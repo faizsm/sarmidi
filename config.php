@@ -1,0 +1,15 @@
+<?php
+session_start();
+
+$host = 'localhost';
+$dbname = 'les_ahe';
+$user = 'root';
+$pass = ''; // atau sesuai password MySQL Anda
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Koneksi gagal: " . $e->getMessage());
+}
+?>
