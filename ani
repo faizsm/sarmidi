@@ -1,1 +1,77 @@
-http://11220027faizsm.great-site.net/index.php
+<?php
+include('koneksi.php');
+session_start(); // supaya bisa pakai $_SESSION['login']
+?>
+
+<!-- JQuery untuk hapus -->
+<script type="text/javascript">
+  $(document).ready(function () {
+    $(".delbutton").click(function () {
+      var element = $(this);
+      var del_id = element.attr("id");
+      var info = 'nomor=' + del_id;
+
+      if (confirm("Anda yakin akan menghapus?")) {
+        $.ajax({
+          type: "POST",
+          url: "hapus_lokasi.php",
+          data: info,
+          success: function () {
+            // Optional: tampilkan notifikasi di sini
+          }
+        });
+
+        // Sembunyikan item
+        $(this).closest(".content-white").animate({ opacity: "hide" }, "slow");
+      }
+      return false;
+    });
+  });
+</script>
+
+<!-- CSS tulisan putih -->
+<style>
+  .a-white {
+    color: white !important;
+  }
+</style>
+
+<?php
+// Ambil data lokasi
+if (!isset($_SESSION['login'])) {
+  // Belum login: hanya yang status = 1
+  $lokasi = mysqli_query($koneksi, "SELECT * FROM kordinat_gis WHERE status = 1 ORDER BY nomor DESC LIMIT 10");
+} else {
+  // Sudah login: tampilkan semua
+  $lokasi = mysqli_query($koneksi, "SELECT * FROM kordinat_gis ORDER BY nomor DESC");
+}
+?>
+
+<ul>
+<?php while ($koor = mysqli_fetch_array($lokasi)) : ?>
+  <li class="content-white">
+    <!-- Nama tempat -->
+    <a
+      class="<?= $koor['status'] == 0 ? 'a-white' : ''; ?>"
+      href="javascript:carikordinat(new google.maps.LatLng(<?= $koor['x']; ?>, <?= $koor['y']; ?>))">
+      <?= htmlspecialchars($koor['nama_tempat']); ?>
+    </a>
+
+    <?php if (isset($_SESSION['login'])): ?>
+      <!-- Tombol Hapus -->
+      <a href="#" class="delbutton" id="<?= $koor['nomor']; ?>" title="Hapus" style="margin-left: 5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="white" viewBox="0 0 24 24">
+          <path d="M3 6h18v2H3V6zm2 3h14l-1 12H6L5 9zm3-5h4v2H8V4z" />
+        </svg>
+      </a>
+
+      <!-- Tombol Edit -->
+      <a href="edit_tempat.php?nomor=<?= $koor['nomor']; ?>" title="Edit" style="margin-left:5px; color:yellow;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="yellow" viewBox="0 0 24 24">
+          <path d="M3 17.25V21h3.75l11.07-11.07-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
+        </svg>
+      </a>
+    <?php endif; ?>
+  </li>
+<?php endwhile; ?>
+</ul>
